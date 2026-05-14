@@ -362,6 +362,10 @@ function renderQ() {
             `<button class="opt" onclick="choose(${i})">${o.label}</button>`
           ).join('')}
         </div>
+        ${state.current === 'q_type' ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;">
+          <label class="field-label" style="margin-bottom:6px;display:block;">Gross value (£) <span style="color:#bbb;font-weight:400;">— optional</span></label>
+          <input class="field-input" id="gross-value-input" type="number" min="0" placeholder="e.g. 250" style="max-width:180px;" value="${state.outcome.grossValue||''}">
+        </div>` : ''}
       </div>
       <div class="card-foot">
         ${hasBack ? `<button class="btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
@@ -411,7 +415,7 @@ function renderDesc() {
   if (o.psaType === 'included') {
     fieldsHtml += `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;">
       <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#0f6e56;margin-bottom:.75rem;">PSA — refine criterion</div>
-      <div class="field-group"><label class="field-label">Total cost (£)</label><input class="field-input" id="df_psaCost" placeholder="e.g. 850" oninput="updatePsaCriterion()" value="${state.fields.psaCost||''}"></div>
+      <div class="field-group"><label class="field-label">Total cost (£)</label><input class="field-input" id="df_psaCost" type="number" placeholder="e.g. 850" oninput="updatePsaCriterion()" value="${state.fields.psaCost||state.outcome.grossValue||''}"></div>
       <div id="criterion-output" style="margin-top:.6rem;font-size:13px;color:#888;line-height:1.5;"></div>
     </div>`;
   }
@@ -457,7 +461,15 @@ ${o.vatNote ? `<div class="info-row" style="background:#fdf6e3;border-top:1px so
 
 function buildDesc(tpl) {
   const base = tpl.build(state.fields);
-  return state.outcome.psaType === 'included' ? base + ' – PSA' : base;
+  if (state.outcome.psaType === 'included') {
+    // Suppress PSA tag on merch if per-head is trivial benefit (≤£50)
+    if (state.outcome.expType === 'merch' && state.fields.psaCost && state.fields.psaHeads) {
+      const perHead = parseFloat(state.fields.psaCost) / parseFloat(state.fields.psaHeads);
+      if (perHead <= 50) return base;
+    }
+    return base + ' – PSA';
+  }
+  return base;
 }
 
 function countNames(str) {
@@ -484,8 +496,18 @@ function updatePsaCriterion() {
     return;
   }
   const perHead = cost / heads;
-  const label = '£' + perHead.toFixed(2) + ' per head across ' + heads + ' ' + (heads === 1 ? 'person' : 'people') + ' — tag as PSA.';
-  out.innerHTML = '<strong style="color:#085041;">' + label + '</strong>';
+  let label, colour;
+  if (state.outcome.expType === 'merch' && perHead <= 50) {
+    label = '£' + perHead.toFixed(2) + ' per employee — trivial benefit exemption applies (£50 or under). No PSA tag needed.';
+    colour = '#3B6D11';
+  } else if (perHead <= 50) {
+    label = '£' + perHead.toFixed(2) + ' per head across ' + heads + ' ' + (heads === 1 ? 'person' : 'people') + ' — tag as PSA.';
+    colour = '#085041';
+  } else {
+    label = '£' + perHead.toFixed(2) + ' per head across ' + heads + ' ' + (heads === 1 ? 'person' : 'people') + ' — tag as PSA.';
+    colour = '#085041';
+  }
+  out.innerHTML = '<strong style="color:' + colour + ';">' + label + '</strong>';
   const tpl = TEMPLATES[getTemplate(state.outcome)];
   const preview = document.getElementById('desc-preview');
   if (preview) preview.textContent = buildDesc(tpl);
@@ -516,13 +538,31 @@ function copyDesc() {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function choose(i) {
+  // Capture gross value from page 1 before navigating away
+  if (state.current === 'q_type') {
+    const gvEl = document.getElementById('gross-value-input');
+    if (gvEl && gvEl.value) state.outcome.grossValue = parseFloat(gvEl.value);
+  }
   const q = QS[state.current];
   const opt = q.opts[i];
   state.history.push({ q: state.current, outcome: JSON.parse(JSON.stringify(state.outcome)), phase: state.phase });
   Object.assign(state.outcome, opt.set);
+  // Auto-determine gift PSA if gross value already known — skip q_gift_val
+  if (opt.next === 'q_gift_val' && state.outcome.grossValue) {
+    const val = state.outcome.grossValue;
+    if (val <= 50) {
+      Object.assign(state.outcome, { psaType: 'exempt', psaReason: 'Trivial benefit exemption — non-cash gift at or under £50. No reporting required.' });
+    } else {
+      Object.assign(state.outcome, { psaType: 'included' });
+    }
+    state.phase = 'desc';
+    state.fields = { grossValue: state.outcome.grossValue };
+    renderDesc();
+    return;
+  }
   if (opt.next === 'desc') {
     state.phase = 'desc';
-    state.fields = {};
+    state.fields = state.outcome.grossValue ? { grossValue: state.outcome.grossValue } : {};
     renderDesc();
   } else {
     state.current = opt.next;
