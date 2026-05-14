@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Submission Helper — Element Human</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;background:#f5f4f1;color:#1a1a1a;min-height:100vh;padding:2rem 1rem 4rem}
+.page{max-width:640px;margin:0 auto}
+.header{margin-bottom:2rem}
+.logo{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:1rem}
+h1{font-size:22px;font-weight:600;color:#111;margin-bottom:.4rem;letter-spacing:-.01em}
+.header p{font-size:14px;color:#666;line-height:1.55;max-width:500px}
+
+/* Cards */
+.card{background:#fff;border-radius:12px;border:1px solid #e8e6e0;overflow:hidden;margin-bottom:1rem}
+.card-top{padding:.9rem 1.4rem;border-bottom:1px solid #f0ede8;display:flex;align-items:center;justify-content:space-between}
+.step-label{font-size:12px;color:#999;font-weight:500}
+.progress{display:flex;gap:4px}
+.prog-dot{width:20px;height:3px;border-radius:2px;background:#e8e6e0;transition:background .2s}
+.prog-dot.on{background:#1a1a1a}
+.card-body{padding:1.5rem 1.4rem .8rem}
+.q-text{font-size:17px;font-weight:600;color:#111;margin-bottom:.35rem;line-height:1.35;letter-spacing:-.01em}
+.q-hint{font-size:13px;color:#888;margin-bottom:1.25rem;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:7px}
+.opt{text-align:left;padding:.65rem .95rem;background:#fff;border:1px solid #e8e6e0;border-radius:8px;font-size:14px;color:#1a1a1a;cursor:pointer;line-height:1.45;transition:border-color .15s,background .15s;font-family:inherit;width:100%}
+.opt:hover{border-color:#bbb;background:#faf9f7}
+.opt:active{background:#f2f0ec}
+.card-foot{padding:.6rem 1.4rem 1.1rem;display:flex;justify-content:space-between;align-items:center}
+.btn-back{font-size:13px;padding:6px 11px;border:1px solid #e8e6e0;border-radius:6px;background:#fff;color:#555;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+.btn-back:hover{border-color:#bbb;background:#faf9f7}
+.btn-restart{font-size:13px;padding:6px 11px;border:none;background:transparent;color:#bbb;cursor:pointer;font-family:inherit}
+.btn-restart:hover{color:#666}
+
+/* Result badges */
+.outcome-strip{padding:1.1rem 1.4rem;border-bottom:1px solid;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.outcome-cell{}
+.outcome-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.outcome-val{font-size:15px;font-weight:600;line-height:1.3}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;letter-spacing:.04em;text-transform:uppercase}
+
+/* PSA type colours */
+.psa-included .outcome-strip{background:#eaf8f2;border-color:#a8e0c8}
+.psa-included .outcome-lbl{color:#0f6e56}
+.psa-included .outcome-val{color:#085041}
+.psa-included .badge{background:#c6eedc;color:#085041}
+
+.psa-exempt .outcome-strip{background:#f2f8e8;border-color:#c6dc98}
+.psa-exempt .outcome-lbl{color:#3B6D11}
+.psa-exempt .outcome-val{color:#27500A}
+.psa-exempt .badge{background:#daedb6;color:#27500A}
+
+.psa-excluded .outcome-strip{background:#fdf0eb;border-color:#f5c4a8}
+.psa-excluded .outcome-lbl{color:#993C1D}
+.psa-excluded .outcome-val{color:#4A1B0C}
+.psa-excluded .badge{background:#fad6c2;color:#4A1B0C}
+
+.psa-none .outcome-strip{background:#f7f6f3;border-color:#e2dfd8}
+.psa-none .outcome-lbl{color:#888}
+.psa-none .outcome-val{color:#444}
+.psa-none .badge{background:#e8e6e0;color:#666}
+
+/* Description builder */
+.desc-section{padding:1.25rem 1.4rem}
+.desc-title{font-size:13px;font-weight:600;color:#333;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
+.field-group{margin-bottom:.9rem}
+.field-label{font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px}
+.field-input{width:100%;padding:8px 10px;font-size:14px;border:1px solid #e0ddd7;border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit;transition:border-color .15s}
+.field-input:focus{outline:none;border-color:#999}
+.field-input::placeholder{color:#bbb}
+.fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Preview */
+.preview-block{margin-top:1.25rem;padding-top:1.1rem;border-top:1px solid #f0ede8}
+.preview-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.5rem}
+.preview-output{font-size:14px;line-height:1.6;color:#1a1a1a;background:#f7f6f3;border-radius:7px;padding:.75rem 1rem;min-height:42px;border:1px solid #e8e6e0;word-break:break-word}
+.preview-output.empty{color:#bbb;font-style:italic}
+
+.copy-row{display:flex;gap:8px;margin-top:.75rem;align-items:center}
+.btn-copy{font-size:13px;padding:7px 14px;border:1px solid #e8e6e0;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+.btn-copy:hover{border-color:#bbb;background:#faf9f7}
+.copy-confirm{font-size:12px;color:#1D9E75;display:none}
+
+/* Note footer */
+.foot-note{margin-top:1.5rem;padding:.9rem 1.1rem;background:#fff;border-radius:8px;border:1px solid #e8e6e0;font-size:13px;color:#888;line-height:1.55}
+.foot-note strong{color:#555;font-weight:600}
+
+/* Tags */
+.info-row{padding:.9rem 1.4rem;border-top:1px solid #f0ede8;font-size:13px;color:#666;line-height:1.55;background:#faf9f7}.info-row strong{font-weight:600}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="logo">Element Human — Finance</div>
+    <h1>Expense submission helper</h1>
+    <p>Answer the questions to get your account code, PSA tag, and a correctly formatted description ready to paste into Xero.</p>
+  </div>
+  <div id="app"></div>
+  <div class="foot-note">
+    <strong>Submitting in Xero:</strong> Log in → Business → Expense Claims → New Expense. Upload your VAT receipt, enter the description and account code from above, and submit monthly. Questions? Contact the Finance team.
+  </div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+const state = {
+  phase: 'q',
+  current: 'q_type',
+  history: [],
+  outcome: {},
+  fields: {}
+};
+
+// ─── Question tree ────────────────────────────────────────────────────────────
+// Each option: { label, next, set }
+// next='desc' → move to description builder phase
+// set → merged into state.outcome
+
+const QS = {
+  q_type: {
+    q: 'What type of expense is this?',
+    hint: 'Select the category that best fits.',
+    opts: [
+      { label: 'Company merchandise or branded items', next: 'desc', set: { expType: 'merch', code: 565, codeName: 'General Expenses', psaType: 'included', psaCriterion: 'irregular' } },
+      { label: 'Gift or personal item for an employee', next: 'q_gift_who', set: { expType: 'gift' } },
+      { label: 'IT equipment or hardware', next: 'q_it_type', set: { expType: 'it' } },
+      { label: 'Marketing or advertising', next: 'desc', set: { expType: 'marketing', code: 540, codeName: 'Advertising & Marketing', psaType: 'none' } },
+      { label: 'Meal or entertaining', next: 'q_meal_who', set: { expType: 'meal' } },
+      { label: 'Software, tool, or subscription', next: 'desc', set: { expType: 'software', code: 550, codeName: 'Subscriptions', psaType: 'none' } },
+      { label: 'Staff training or development', next: 'desc', set: { expType: 'training', code: 536, codeName: 'Staff Training', psaType: 'none' } },
+      { label: 'Travel — train, taxi, flight, Uber, fuel', next: 'q_travel_loc', set: { expType: 'travel' } },
+      { label: 'Something else', next: 'q_other_benefit', set: { expType: 'other' } }
+    ]
+  },
+  q_travel_loc: {
+    q: 'Where is the travel to?',
+    hint: 'UK = anywhere within Great Britain and Northern Ireland.',
+    opts: [
+      { label: 'Within the UK', next: 'desc', set: { code: 572, codeName: 'Travel – National', psaType: 'none' } },
+      { label: 'International', next: 'desc', set: { code: 573, codeName: 'Travel – International', psaType: 'none' } }
+    ]
+  },
+  q_meal_who: {
+    q: 'Who attended?',
+    hint: 'This determines the account code and whether the expense is client entertaining.',
+    opts: [
+      { label: 'Clients or external business contacts', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client entertaining — not an employee benefit. Disallowable for corporation tax.' } },
+      { label: 'EH employees and contractors or non-employees', next: 'q_meal_occasion', set: { code: 546, codeName: 'Entertainment – 0%', vatNote: true } },
+      { label: 'EH employees only', next: 'q_meal_occasion', set: { code: 545, codeName: 'Entertainment – 100% business' } }
+    ]
+  },
+  q_meal_occasion: {
+    q: 'What type of occasion was this?',
+    hint: null,
+    opts: [
+      { label: 'Annual company event (Christmas party, summer event)', next: 'q_party_limit', set: {} },
+      { label: 'Celebration or milestone (work anniversary, leaving, achievement)', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular' } },
+      { label: 'Offsite or away day', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
+      { label: 'Social team lunch or dinner (not a meeting)', next: 'q_team_size', set: {} },
+      { label: 'Working lunch or dinner during a formal meeting', next: 'desc', set: { psaType: 'exempt', psaReason: 'Business subsistence during a qualifying meeting — not a taxable benefit. Retain records of attendees and purpose.' } }
+    ]
+  },
+  q_party_limit: {
+    q: 'Is the combined per-head cost for all company functions this tax year £150 or under?',
+    hint: 'Add up all annual events — Christmas party, summer party, etc. If the total per head exceeds £150, the exemption is lost and the full amount becomes taxable.',
+    opts: [
+      { label: 'Yes — £150 per head or under in total', next: 'desc', set: { psaType: 'exempt', psaReason: 'Annual party exemption (≤£150/head across all functions this tax year).' } },
+      { label: 'No — combined cost exceeds £150 per head', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } }
+    ]
+  },
+  q_team_size: {
+    q: 'How many people attended?',
+    hint: null,
+    opts: [
+      { label: '3 or more', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
+      { label: '2 or fewer', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor' } }
+    ]
+  },
+  q_gift_who: {
+    q: 'Who is the gift for?',
+    hint: null,
+    opts: [
+      { label: 'A client or external contact', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client gift — not an employee benefit.' } },
+      { label: 'New joiner welcome', next: 'q_gift_val', set: { code: 565, codeName: 'General Expenses', giftType: 'welcome' } },
+      { label: 'Personal milestone — wedding, baby, marathon', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'milestone' } },
+      { label: 'Team recognition, prize, or achievement award', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'recognition' } }
+    ]
+  },
+  q_gift_val: {
+    q: 'What is the value of the gift?',
+    hint: 'The trivial benefit exemption covers non-cash gifts of £50 or under, provided they are not performance-related.',
+    opts: [
+      { label: '£50 or under', next: 'desc', set: { psaType: 'exempt', psaReason: 'Trivial benefit exemption — non-cash gift at or under £50. No reporting required.' } },
+      { label: 'Over £50', next: 'desc', set: { psaType: 'included' } }
+    ]
+  },
+  q_it_type: {
+    q: 'What type of IT cost?',
+    hint: null,
+    opts: [
+      { label: 'Hardware, peripherals, or accessories', next: 'desc', set: { code: 567, codeName: 'IT Consumables', psaType: 'none' } },
+      { label: 'Phone or internet', next: 'desc', set: { code: 571, codeName: 'Telephone & Internet', psaType: 'none' } }
+    ]
+  },
+  q_other_benefit: {
+    q: 'Does this expense directly benefit a specific employee?',
+    hint: 'e.g. a voucher, personal item, or subscription provided for personal use.',
+    opts: [
+      { label: 'Yes — it benefits a specific employee or group', next: 'q_other_criteria', set: { code: 565, codeName: 'General Expenses' } },
+      { label: 'No — it is a general business cost', next: 'desc', set: { code: 565, codeName: 'General Expenses', psaType: 'none' } }
+    ]
+  },
+  q_other_criteria: {
+    q: 'Which PSA criterion best applies?',
+    hint: 'HMRC requires at least one to apply for a benefit to be PSA-eligible.',
+    opts: [
+      { label: 'Impracticable — cannot be attributed to individual employees', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
+      { label: 'Irregular — not part of regular or recurring remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular' } },
+      { label: 'Minor — low in value relative to total remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor' } },
+      { label: 'None of these apply', next: 'desc', set: { psaType: 'excluded', psaReason: 'Does not meet PSA criteria. Report via P11D or payroll.' } }
+    ]
+  }
+};
+
+// Question order for progress bar
+const Q_ORDER = ['q_type','q_travel_loc','q_meal_who','q_meal_occasion','q_party_limit','q_team_size','q_gift_who','q_gift_val','q_it_type','q_other_benefit','q_other_criteria'];
+const MAX_STEPS = 3;
+
+// ─── Description templates ────────────────────────────────────────────────────
+const TEMPLATES = {
+  travel: {
+    fields: [
+      { id:'transport', label:'Mode of transport', ph:'Return train / Taxi / Flight / Uber', half:false },
+      { id:'from', label:'From', ph:'e.g. Crewe', half:true },
+      { id:'to', label:'To', ph:'e.g. London Euston', half:true },
+      { id:'names', label:'Your name', ph:'e.g. CW', half:true },
+      { id:'traveldate', label:'Date of travel', ph:'e.g. 13 Feb 25', half:true },
+      { id:'purpose', label:'Purpose', ph:'e.g. Company meeting at Gazette', half:false }
+    ],
+    build: f => `${f.transport||'?'} – ${f.from||'?'} > ${f.to||'?'} – ${f.names||'?'} (EH) – ${f.purpose||'?'} – ${f.traveldate||'?'}`
+  },
+  meal_client: {
+    fields: [
+      { id:'occasion', label:'Purpose / occasion', ph:'Client meeting / Client dinner', half:false },
+      { id:'venue', label:'Venue', ph:'e.g. Nando\'s, The Ivy', half:false },
+      { id:'ehnames', label:'EH attendees', ph:'e.g. HM, AT, CW', half:true },
+      { id:'clientorg', label:'Client / organisation name', ph:'e.g. Netflix', half:true },
+      { id:'clientcount', label:'Number of external attendees', ph:'e.g. 2', half:true }
+    ],
+    build: f => `${f.occasion||'?'} (${f.clientorg||'?'}) at ${f.venue||'?'} – EH (${f.ehnames||'?'}), ${f.clientorg||'?'} x${f.clientcount||'?'}`
+  },
+  meal_staff: {
+    fields: [
+      { id:'occasion', label:'Occasion', ph:'e.g. Q1 offsite, Annual retreat, Team dinner', half:false },
+      { id:'venue', label:'Venue or location', ph:'e.g. Edells, Nando\'s Soho', half:false },
+      { id:'names', label:'Attendees', ph:'e.g. HM, MC, CW, AT, NS', half:false }
+    ],
+    build: f => `${f.occasion||'?'} at ${f.venue||'?'} – EH (${f.names||'?'})`
+  },
+  gift: {
+    fields: [
+      { id:'item', label:'Gift or item', ph:'e.g. Wedding gift, Desk plant, Marathon goodies', half:false },
+      { id:'recipient', label:'Recipient name', ph:'e.g. GF', half:true },
+      { id:'occasion', label:'Occasion', ph:'e.g. Wedding, New joiner, Marathon', half:true }
+    ],
+    build: f => `${f.item||'?'} – ${f.recipient||'?'} (EH) – ${f.occasion||'?'}`
+  },
+  merch: {
+    fields: [
+      { id:'item', label:'Item description', ph:'e.g. EH branded hoodies, EH aprons', half:false },
+      { id:'names', label:'Recipients', ph:'e.g. All EH employees / HM, AT, CW', half:false }
+    ],
+    build: f => `${f.item||'?'} – EH (${f.names||'?'})`
+  },
+  software: {
+    fields: [
+      { id:'service', label:'Service or product name', ph:'e.g. Figma, Slack Pro', half:false },
+      { id:'purpose', label:'Business purpose', ph:'e.g. Design tool, Team comms', half:false }
+    ],
+    build: f => `${f.service||'?'} – ${f.purpose||'?'}`
+  },
+  general: {
+    fields: [
+      { id:'what', label:'Description', ph:'What was the expense?', half:false },
+      { id:'names', label:'People involved (if applicable)', ph:'e.g. HM, CW, AT', half:false },
+      { id:'purpose', label:'Purpose or context', ph:'e.g. Q1 offsite, client pitch', half:false }
+    ],
+    build: f => {
+      const parts = [f.what||'?'];
+      if (f.names) parts.push(`EH (${f.names})`);
+      if (f.purpose) parts.push(f.purpose);
+      return parts.join(' – ');
+    }
+  }
+};
+
+function getTemplate(o) {
+  if (o.expType === 'travel') return 'travel';
+  if (o.expType === 'meal') {
+    if (o.psaReason && o.psaReason.startsWith('Client')) return 'meal_client';
+    return 'meal_staff';
+  }
+  if (o.expType === 'gift') return 'gift';
+  if (o.expType === 'merch') return 'merch';
+  if (o.expType === 'software') return 'software';
+  return 'general';
+}
+
+// ─── PSA display helpers ──────────────────────────────────────────────────────
+const PSA_LABELS = {
+  included: { tag: 'Tag as PSA', cls: 'psa-included', badge: 'Include in PSA' },
+  exempt:   { tag: 'No tag needed', cls: 'psa-exempt',   badge: 'Exempt' },
+  excluded: { tag: 'No PSA tag', cls: 'psa-excluded',  badge: 'Exclude from PSA' },
+  none:     { tag: 'Not applicable', cls: 'psa-none',  badge: 'N/A' }
+};
+
+const CRITERION_LABELS = {
+  minor: 'Minor benefit',
+  irregular: 'Irregular benefit',
+  impracticable: 'Impracticable to payroll'
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function qs(id){ return document.getElementById(id) }
+function progressDots(currentQ) {
+  const idx = Q_ORDER.indexOf(currentQ);
+  const pct = idx < 0 ? 0 : Math.min(idx, MAX_STEPS - 1);
+  return Array.from({length: MAX_STEPS}, (_, i) =>
+    `<div class="prog-dot ${i <= pct ? 'on' : ''}"></div>`
+  ).join('');
+}
+
+// ─── Render question phase ────────────────────────────────────────────────────
+function renderQ() {
+  const q = QS[state.current];
+  const app = qs('app');
+  const hasBack = state.history.length > 0;
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-top">
+        <span class="step-label">Select one</span>
+        <div class="progress">${progressDots(state.current)}</div>
+      </div>
+      <div class="card-body">
+        <div class="q-text">${q.q}</div>
+        ${q.hint ? `<div class="q-hint">${q.hint}</div>` : '<div style="height:.75rem"></div>'}
+        <div class="options">
+          ${q.opts.map((o,i) =>
+            `<button class="opt" onclick="choose(${i})">${o.label}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="card-foot">
+        ${hasBack ? `<button class="btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
+        <button class="btn-restart" onclick="restart()">Restart</button>
+      </div>
+    </div>
+  `;
+}
+
+// ─── Render description builder ───────────────────────────────────────────────
+function renderDesc() {
+  const o = state.outcome;
+
+  // Fix recognition gifts → irregular
+  if (o.giftType === 'recognition' && o.psaType === 'included') o.psaCriterion = 'irregular';
+  // If included but no criterion set (shouldn't happen but safety)
+  if (o.psaType === 'included' && !o.psaCriterion) o.psaCriterion = 'minor';
+
+  const psa = PSA_LABELS[o.psaType] || PSA_LABELS.none;
+  const tplKey = getTemplate(o);
+  const tpl = TEMPLATES[tplKey];
+
+  // PSA sub-label
+  let psaDetail = '';
+  if (o.psaType === 'included' && o.psaCriterion) psaDetail = `<div style="font-size:12px;font-weight:400;color:${o.psaType==='included'?'#1D9E75':''};margin-top:3px;">${CRITERION_LABELS[o.psaCriterion]}</div>`;
+  if (o.psaReason) psaDetail = `<div style="font-size:12px;font-weight:400;color:#888;margin-top:3px;line-height:1.4;">${o.psaReason}</div>`;
+
+  // Build fields HTML
+  let fieldsHtml = '';
+  let i = 0;
+  while (i < tpl.fields.length) {
+    const f = tpl.fields[i];
+    if (f.half && i+1 < tpl.fields.length && tpl.fields[i+1].half) {
+      const f2 = tpl.fields[i+1];
+      fieldsHtml += `<div class="fields-row">
+        <div class="field-group"><label class="field-label">${f.label}</label><input class="field-input" id="df_${f.id}" placeholder="${f.ph}" oninput="updateField('${f.id}',this.value)" value="${state.fields[f.id]||''}"></div>
+        <div class="field-group"><label class="field-label">${f2.label}</label><input class="field-input" id="df_${f2.id}" placeholder="${f2.ph}" oninput="updateField('${f2.id}',this.value)" value="${state.fields[f2.id]||''}"></div>
+      </div>`;
+      i += 2;
+    } else {
+      fieldsHtml += `<div class="field-group"><label class="field-label">${f.label}</label><input class="field-input" id="df_${f.id}" placeholder="${f.ph}" oninput="updateField('${f.id}',this.value)" value="${state.fields[f.id]||''}"></div>`;
+      i++;
+    }
+  }
+
+  // Add PSA cost/headcount fields when included — used to refine minor vs impracticable
+  if (o.psaType === 'included') {
+    fieldsHtml += `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#0f6e56;margin-bottom:.75rem;">PSA — refine criterion</div>
+      <div class="field-group"><label class="field-label">Total cost (£)</label><input class="field-input" id="df_psaCost" placeholder="e.g. 850" oninput="updatePsaCriterion()" value="${state.fields.psaCost||''}"></div>
+      <div id="criterion-output" style="margin-top:.6rem;font-size:13px;color:#888;line-height:1.5;"></div>
+    </div>`;
+  }
+
+  const desc = buildDesc(tpl);
+  const isEmpty = !Object.values(state.fields).some(v=>v);
+
+  qs('app').innerHTML = `
+    <div class="card ${psa.cls}">
+      <div class="outcome-strip">
+        <div class="outcome-cell">
+          <div class="outcome-lbl">Account code</div>
+          <div class="outcome-val">${o.code} – ${o.codeName}</div>
+        </div>
+        <div class="outcome-cell">
+          <div class="outcome-lbl">PSA</div>
+          <div class="outcome-val"><span class="badge">${psa.badge}</span></div>
+          ${psaDetail}
+        </div>
+      </div>
+      ${o.psaReason && o.psaType !== 'excluded' ? `<div class="info-row">${o.psaReason}</div>` : ''}
+      ${o.psaType === 'excluded' && o.psaReason ? `<div class="info-row">${o.psaReason}</div>` : ''}
+${o.vatNote ? `<div class="info-row" style="background:#fdf6e3;border-top:1px solid #f0d98a;color:#7a5c00;"><strong style="color:#5a4200;">VAT note — flag to Finance:</strong> This event included employees and non-employees. EH can recover the employee proportion of input VAT. Submit to Finance with a headcount split (e.g. 8 EH employees, 4 contractors) so the cost can be apportioned between 545 and 546 accordingly.</div>` : ''}
+      <div class="desc-section">
+        <div class="desc-title">Build your description</div>
+        ${fieldsHtml}
+        <div class="preview-block">
+          <div class="preview-lbl">Description preview</div>
+          <div class="preview-output${isEmpty?' empty':''}" id="desc-preview">${isEmpty ? 'Fill in the fields above to generate your description' : desc}</div>
+          <div class="copy-row">
+            <button class="btn-copy" onclick="copyDesc()">Copy description</button>
+            <span class="copy-confirm" id="copy-ok">Copied</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-restart" onclick="restart()">New expense</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildDesc(tpl) {
+  const base = tpl.build(state.fields);
+  return state.outcome.psaType === 'included' ? base + ' – PSA' : base;
+}
+
+function countNames(str) {
+  if (!str || !str.trim()) return 0;
+  return str.split(',').map(s => s.trim()).filter(s => s.length > 0).length;
+}
+
+function updatePsaCriterion() {
+  const costEl = document.getElementById('df_psaCost');
+  const cost = parseFloat(costEl?.value) || 0;
+  state.fields.psaCost = costEl?.value || '';
+
+  // Infer headcount from whichever names field is present
+  const namesEl = document.getElementById('df_names') || document.getElementById('df_ehnames');
+  const heads = namesEl ? countNames(namesEl.value) : 0;
+  state.fields.psaHeads = heads > 0 ? String(heads) : '';
+
+  const out = document.getElementById('criterion-output');
+  if (!out) return;
+  if (!cost || !heads) {
+    out.innerHTML = heads === 0 && namesEl
+      ? '<span style="color:#bbb;">Enter attendee names above to calculate cost per head.</span>'
+      : '';
+    return;
+  }
+  const perHead = cost / heads;
+  const label = '£' + perHead.toFixed(2) + ' per head across ' + heads + ' ' + (heads === 1 ? 'person' : 'people') + ' — tag as PSA.';
+  out.innerHTML = '<strong style="color:#085041;">' + label + '</strong>';
+  const tpl = TEMPLATES[getTemplate(state.outcome)];
+  const preview = document.getElementById('desc-preview');
+  if (preview) preview.textContent = buildDesc(tpl);
+}
+
+function updateField(id, val) {
+  state.fields[id] = val.trim();
+  const tpl = TEMPLATES[getTemplate(state.outcome)];
+  const desc = buildDesc(tpl);
+  const el = qs('desc-preview');
+  if (el) {
+    el.textContent = desc;
+    el.classList.remove('empty');
+  }
+  if ((id === 'names' || id === 'ehnames') && state.outcome.psaType === 'included') {
+    updatePsaCriterion();
+  }
+}
+
+function copyDesc() {
+  const tpl = TEMPLATES[getTemplate(state.outcome)];
+  const desc = buildDesc(tpl);
+  navigator.clipboard.writeText(desc).then(() => {
+    const el = qs('copy-ok');
+    if (el) { el.style.display = 'inline'; setTimeout(() => el.style.display = 'none', 2000); }
+  });
+}
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+function choose(i) {
+  const q = QS[state.current];
+  const opt = q.opts[i];
+  state.history.push({ q: state.current, outcome: JSON.parse(JSON.stringify(state.outcome)), phase: state.phase });
+  Object.assign(state.outcome, opt.set);
+  if (opt.next === 'desc') {
+    state.phase = 'desc';
+    state.fields = {};
+    renderDesc();
+  } else {
+    state.current = opt.next;
+    renderQ();
+  }
+}
+
+function goBack() {
+  if (state.history.length === 0) return;
+  const prev = state.history.pop();
+  state.current = prev.q;
+  state.outcome = prev.outcome;
+  state.phase = prev.phase;
+  state.fields = {};
+  if (state.phase === 'desc') renderDesc(); else renderQ();
+}
+
+function restart() {
+  state.phase = 'q';
+  state.current = 'q_type';
+  state.history = [];
+  state.outcome = {};
+  state.fields = {};
+  renderQ();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+renderQ();
+</script>
+</body>
+</html>
