@@ -418,15 +418,16 @@ function renderQ() {
       <div class="card-body">
         <div class="q-text">${q.q}</div>
         ${q.hint ? `<div class="q-hint">${q.hint}</div>` : '<div style="height:.75rem"></div>'}
+        ${state.current === 'q_type' ? `<div style="margin-bottom:1.25rem;">
+          <label class="field-label" style="margin-bottom:4px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#333;">Gross value (£) <span style="font-size:11px;font-weight:600;color:#c0392b;background:#fdecea;padding:1px 6px;border-radius:4px;letter-spacing:.04em;">Required</span></label>
+          <input class="field-input" id="gross-value-input" type="number" min="0" placeholder="e.g. 250" style="max-width:180px;" value="${state.outcome.grossValue||''}" oninput="clearGrossError()">
+          <div id="gross-error" style="display:none;font-size:12px;color:#c0392b;margin-top:4px;">Enter the gross value before selecting a category.</div>
+        </div>` : ''}
         <div class="options">
           ${q.opts.map((o,i) =>
             `<button class="opt" onclick="choose(${i})">${o.label}</button>`
           ).join('')}
         </div>
-        ${state.current === 'q_type' ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;">
-          <label class="field-label" style="margin-bottom:6px;display:block;">Gross value (£) <span style="color:#bbb;font-weight:400;">— optional</span></label>
-          <input class="field-input" id="gross-value-input" type="number" min="0" placeholder="e.g. 250" style="max-width:180px;" value="${state.outcome.grossValue||''}">
-        </div>` : ''}
       </div>
       <div class="card-foot">
         ${hasBack ? `<button class="btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
@@ -609,11 +610,25 @@ function copyDesc() {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
+function clearGrossError() {
+  const err = document.getElementById('gross-error');
+  const inp = document.getElementById('gross-value-input');
+  if (err) err.style.display = 'none';
+  if (inp) inp.style.borderColor = '';
+}
+
 function choose(i) {
-  // Capture gross value from page 1 before navigating away
+  // Gross value is mandatory on the first question
   if (state.current === 'q_type') {
     const gvEl = document.getElementById('gross-value-input');
-    if (gvEl && gvEl.value) state.outcome.grossValue = parseFloat(gvEl.value);
+    const val = gvEl ? gvEl.value.trim() : '';
+    if (!val || parseFloat(val) <= 0) {
+      const err = document.getElementById('gross-error');
+      if (err) err.style.display = 'block';
+      if (gvEl) { gvEl.style.borderColor = '#c0392b'; gvEl.focus(); }
+      return;
+    }
+    state.outcome.grossValue = parseFloat(val);
   }
   const q = QS[state.current];
   const opt = q.opts[i];
