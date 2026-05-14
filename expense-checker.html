@@ -4,43 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Expense Submission Helper — Element Human</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;background:#f5f4f1;color:#1a1a1a;min-height:100vh;padding:2rem 1rem 4rem}
-.page{max-width:640px;margin:0 auto}
+body{font-family:'Poppins',sans-serif;font-size:15px;line-height:1.6;background:#eef0f4;color:#1a1a1a;min-height:100vh}
+.eh-nav{background:#13202F;width:100%;padding:.7rem 1.5rem}
+.eh-nav-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.eh-marbles{display:flex;gap:3px;align-items:center}
+.marble{width:15px;height:15px;border-radius:50%}
+.m1{background:linear-gradient(to bottom,#FF2198 50%,#54E42B 50%)}
+.m2{background:linear-gradient(to bottom,#F9BE00 50%,#FF2198 50%)}
+.m3{background:linear-gradient(to bottom,#10A8B7 50%,#F9BE00 50%)}
+.eh-brand{font-size:14px;font-weight:600;color:#fff;letter-spacing:-.01em}
+.eh-dept{font-size:14px;font-weight:300;color:rgba(255,255,255,.45)}
+.page{max-width:640px;margin:0 auto;padding:2rem 1rem 4rem}
 .header{margin-bottom:2rem}
-.logo{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#999;margin-bottom:1rem}
-h1{font-size:22px;font-weight:600;color:#111;margin-bottom:.4rem;letter-spacing:-.01em}
+h1{font-size:22px;font-weight:700;color:#13202F;margin-bottom:.35rem;letter-spacing:-.02em}
 .header p{font-size:14px;color:#666;line-height:1.55;max-width:500px}
 
 /* Cards */
-.card{background:#fff;border-radius:12px;border:1px solid #e8e6e0;overflow:hidden;margin-bottom:1rem}
-.card-top{padding:.9rem 1.4rem;border-bottom:1px solid #f0ede8;display:flex;align-items:center;justify-content:space-between}
+.card{background:#fff;border-radius:12px;border:1px solid #dde1e8;overflow:hidden;margin-bottom:1rem}
+.card-top{padding:.9rem 1.4rem;border-bottom:1px solid #edf0f4;display:flex;align-items:center;justify-content:space-between}
 .step-label{font-size:12px;color:#999;font-weight:500}
 .progress{display:flex;gap:4px}
-.prog-dot{width:20px;height:3px;border-radius:2px;background:#e8e6e0;transition:background .2s}
-.prog-dot.on{background:#1a1a1a}
+.prog-dot{width:20px;height:3px;border-radius:2px;background:#dde1e8;transition:background .2s}
+.prog-dot.on{background:#007AFF}
 .card-body{padding:1.5rem 1.4rem .8rem}
-.q-text{font-size:17px;font-weight:600;color:#111;margin-bottom:.35rem;line-height:1.35;letter-spacing:-.01em}
+.q-text{font-size:17px;font-weight:600;color:#13202F;margin-bottom:.35rem;line-height:1.35;letter-spacing:-.01em}
 .q-hint{font-size:13px;color:#888;margin-bottom:1.25rem;line-height:1.5}
 .options{display:flex;flex-direction:column;gap:7px}
-.opt{text-align:left;padding:.65rem .95rem;background:#fff;border:1px solid #e8e6e0;border-radius:8px;font-size:14px;color:#1a1a1a;cursor:pointer;line-height:1.45;transition:border-color .15s,background .15s;font-family:inherit;width:100%}
-.opt:hover{border-color:#bbb;background:#faf9f7}
-.opt:active{background:#f2f0ec}
+.opt{text-align:left;padding:.65rem .95rem;background:#fff;border:1px solid #dde1e8;border-radius:8px;font-size:14px;color:#13202F;cursor:pointer;line-height:1.45;transition:border-color .15s,background .15s;font-family:inherit;width:100%}
+.opt:hover{border-color:#007AFF;background:rgba(0,122,255,.04);color:#007AFF}
+.opt:active{background:rgba(0,122,255,.08)}
 .card-foot{padding:.6rem 1.4rem 1.1rem;display:flex;justify-content:space-between;align-items:center}
-.btn-back{font-size:13px;padding:6px 11px;border:1px solid #e8e6e0;border-radius:6px;background:#fff;color:#555;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
-.btn-back:hover{border-color:#bbb;background:#faf9f7}
+.btn-back{font-size:13px;padding:6px 11px;border:1px solid #dde1e8;border-radius:6px;background:#fff;color:#555;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+.btn-back:hover{border-color:#007AFF;color:#007AFF;background:rgba(0,122,255,.04)}
 .btn-restart{font-size:13px;padding:6px 11px;border:none;background:transparent;color:#bbb;cursor:pointer;font-family:inherit}
-.btn-restart:hover{color:#666}
+.btn-restart:hover{color:#007AFF}
 
 /* Result badges */
-.outcome-strip{padding:1.1rem 1.4rem;border-bottom:1px solid;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.outcome-cell{}
-.outcome-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.outcome-strip{padding:1.1rem 1.4rem;border-bottom:1px solid;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;align-items:start}
+.outcome-cell{min-width:0}
+.outcome-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px}
 .outcome-val{font-size:15px;font-weight:600;line-height:1.3}
 .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px;letter-spacing:.04em;text-transform:uppercase}
 
-/* PSA type colours */
+/* PSA type colours — keep red/yellow/green coding */
 .psa-included .outcome-strip{background:#eaf8f2;border-color:#a8e0c8}
 .psa-included .outcome-lbl{color:#0f6e56}
 .psa-included .outcome-val{color:#085041}
@@ -51,51 +60,63 @@ h1{font-size:22px;font-weight:600;color:#111;margin-bottom:.4rem;letter-spacing:
 .psa-exempt .outcome-val{color:#27500A}
 .psa-exempt .badge{background:#daedb6;color:#27500A}
 
-.psa-excluded .outcome-strip{background:#fdf0eb;border-color:#f5c4a8}
-.psa-excluded .outcome-lbl{color:#993C1D}
-.psa-excluded .outcome-val{color:#4A1B0C}
-.psa-excluded .badge{background:#fad6c2;color:#4A1B0C}
+.psa-excluded .outcome-strip{background:#fff2f0;border-color:#f5c4a8}
+.psa-excluded .outcome-lbl{color:#b03020}
+.psa-excluded .outcome-val{color:#7a1f10}
+.psa-excluded .badge{background:#ffd5cc;color:#7a1f10}
 
-.psa-none .outcome-strip{background:#f7f6f3;border-color:#e2dfd8}
+.psa-none .outcome-strip{background:#f3f5f8;border-color:#dde1e8}
 .psa-none .outcome-lbl{color:#888}
 .psa-none .outcome-val{color:#444}
-.psa-none .badge{background:#e8e6e0;color:#666}
+.psa-none .badge{background:#e0e4eb;color:#555}
 
 /* Description builder */
 .desc-section{padding:1.25rem 1.4rem}
-.desc-title{font-size:13px;font-weight:600;color:#333;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
+.desc-title{font-size:11px;font-weight:600;color:#007AFF;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.09em}
 .field-group{margin-bottom:.9rem}
-.field-label{font-size:12px;font-weight:500;color:#666;display:block;margin-bottom:4px}
-.field-input{width:100%;padding:8px 10px;font-size:14px;border:1px solid #e0ddd7;border-radius:7px;background:#fff;color:#1a1a1a;font-family:inherit;transition:border-color .15s}
-.field-input:focus{outline:none;border-color:#999}
+.field-label{font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:4px}
+.field-input{width:100%;padding:8px 10px;font-size:14px;border:1px solid #dde1e8;border-radius:7px;background:#fff;color:#13202F;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+.field-input:focus{outline:none;border-color:#007AFF;box-shadow:0 0 0 3px rgba(0,122,255,.1)}
 .field-input::placeholder{color:#bbb}
 .fields-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 /* Preview */
-.preview-block{margin-top:1.25rem;padding-top:1.1rem;border-top:1px solid #f0ede8}
-.preview-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:.5rem}
-.preview-output{font-size:14px;line-height:1.6;color:#1a1a1a;background:#f7f6f3;border-radius:7px;padding:.75rem 1rem;min-height:42px;border:1px solid #e8e6e0;word-break:break-word}
+.preview-block{margin-top:1.25rem;padding-top:1.1rem;border-top:1px solid #edf0f4}
+.preview-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#007AFF;margin-bottom:.5rem}
+.preview-output{font-size:14px;line-height:1.6;color:#13202F;background:#f3f5f8;border-radius:7px;padding:.75rem 1rem;min-height:42px;border:1px solid #dde1e8;word-break:break-word}
 .preview-output.empty{color:#bbb;font-style:italic}
 
 .copy-row{display:flex;gap:8px;margin-top:.75rem;align-items:center}
-.btn-copy{font-size:13px;padding:7px 14px;border:1px solid #e8e6e0;border-radius:6px;background:#fff;color:#333;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
-.btn-copy:hover{border-color:#bbb;background:#faf9f7}
-.copy-confirm{font-size:12px;color:#1D9E75;display:none}
+.btn-copy{font-size:13px;padding:7px 16px;border:none;border-radius:6px;background:#007AFF;color:#fff;cursor:pointer;font-family:inherit;font-weight:500;transition:background .15s}
+.btn-copy:hover{background:#0069d9}
+.btn-copy:active{background:#005bbf}
+.copy-confirm{font-size:12px;color:#54E42B;font-weight:500;display:none}
 
 /* Note footer */
-.foot-note{margin-top:1.5rem;padding:.9rem 1.1rem;background:#fff;border-radius:8px;border:1px solid #e8e6e0;font-size:13px;color:#888;line-height:1.55}
-.foot-note strong{color:#555;font-weight:600}
+.foot-note{margin-top:1.5rem;padding:.9rem 1.1rem;background:#fff;border-radius:8px;border:1px solid #dde1e8;border-left:3px solid #007AFF;font-size:13px;color:#666;line-height:1.55}
+.foot-note strong{color:#13202F;font-weight:600}
 
-/* Tags */
-.info-row{padding:.9rem 1.4rem;border-top:1px solid #f0ede8;font-size:13px;color:#666;line-height:1.55;background:#faf9f7}.info-row strong{font-weight:600}
+/* Info rows */
+.info-row{padding:.9rem 1.4rem;border-top:1px solid #edf0f4;font-size:13px;color:#555;line-height:1.55;background:#f3f5f8}
+.info-row strong{font-weight:600}
 </style>
 </head>
 <body>
+<nav class="eh-nav">
+  <div class="eh-nav-inner">
+    <div class="eh-marbles">
+      <div class="marble m1"></div>
+      <div class="marble m2"></div>
+      <div class="marble m3"></div>
+    </div>
+    <span class="eh-brand">Element Human</span>
+    <span class="eh-dept">Finance</span>
+  </div>
+</nav>
 <div class="page">
   <div class="header">
-    <div class="logo">Element Human — Finance</div>
     <h1>Expense submission helper</h1>
-    <p>Answer the questions to get your account code, PSA tag, and a correctly formatted description ready to paste into Xero.</p>
+    <p>Answer the questions to get your account code, VAT treatment, PSA tag, and a correctly formatted description ready to paste into Xero.</p>
   </div>
   <div id="app"></div>
   <div class="foot-note">
@@ -148,9 +169,9 @@ const QS = {
     opts: [
       { label: 'Car hire', next: 'desc', set: { vatRate: '20%', vatStatus: '50% recoverable', vatNote: 'Car hire VAT is 50% blocked where the vehicle is available for private use — HMRC VAT Notice 700/64.' } },
       { label: 'Flight', next: 'desc', set: { vatRate: 'Zero rated', vatStatus: 'No VAT', vatNote: 'Passenger flights are zero rated. No VAT to reclaim.' } },
-      { label: 'Fuel', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable on business fuel with a VAT receipt. A fuel scale charge may apply for company vehicles.' } },
+      { label: 'Fuel', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'If submitting a fuel receipt (e.g. company card or reimbursed petrol): 20% VAT is recoverable with a VAT receipt. A fuel scale charge applies for company vehicles to account for private use. If claiming mileage at HMRC approved rates (45p/mile etc.): VAT is recovered by Finance using HMRC Advisory Fuel Rates — no fuel VAT receipt needed from you.' } },
       { label: 'Hotel or accommodation', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable. Ensure the VAT invoice is addressed to Element Human.' } },
-      { label: 'Taxi or rideshare (Uber, Bolt etc.)', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable. Uber is VAT registered in the UK — download the VAT invoice from the app.' } },
+      { label: 'Taxi or rideshare (Uber, Bolt etc.)', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable where the supplier is VAT registered. Uber and most corporate rideshare accounts are VAT registered — download the VAT invoice from the app. Traditional taxis and small private hire operators may not be VAT registered, in which case no VAT is charged and none can be reclaimed.' } },
       { label: 'Train, tube, or bus', next: 'desc', set: { vatRate: 'Zero rated', vatStatus: 'No VAT', vatNote: 'Trains, tubes, and buses are zero rated. No VAT to reclaim.' } },
       { label: 'Other', next: 'desc', set: { vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'Check your receipt for VAT. If 20% is charged for a business purpose it is generally recoverable.' } }
     ]
@@ -160,7 +181,7 @@ const QS = {
     hint: 'This determines the account code and whether the expense is client entertaining.',
     opts: [
       { label: 'Clients or external business contacts', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client entertaining — not an employee benefit. Disallowable for corporation tax.', vatRate: '20%', vatStatus: 'Blocked', vatNote: 'Input VAT on client entertaining cannot be reclaimed — HMRC VAT Notice 700/65.' } },
-      { label: 'EH employees and contractors or non-employees', next: 'q_meal_occasion', set: { code: 546, codeName: 'Entertainment – 0%', vatNote: true } },
+      { label: 'EH employees and contractors or non-employees', next: 'q_meal_occasion', set: { code: 546, codeName: 'Entertainment – 0%', vatMixed: true } },
       { label: 'EH employees only', next: 'q_meal_occasion', set: { code: 545, codeName: 'Entertainment – 100% business' } }
     ]
   },
@@ -237,10 +258,10 @@ const QS = {
     q: 'Which PSA criterion best applies?',
     hint: 'HMRC requires at least one to apply for a benefit to be PSA-eligible.',
     opts: [
-      { label: 'Impracticable — cannot be attributed to individual employees', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
-      { label: 'Irregular — not part of regular or recurring remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular' } },
-      { label: 'Minor — low in value relative to total remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor' } },
-      { label: 'None of these apply', next: 'desc', set: { psaType: 'excluded', psaReason: 'Does not meet PSA criteria. Report via P11D or payroll.' } }
+      { label: 'Impracticable — cannot be attributed to individual employees', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable', vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'VAT treatment depends on the nature of the expense. Check your invoice — if 20% VAT is charged for a business purpose it is generally recoverable.' } },
+      { label: 'Irregular — not part of regular or recurring remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular', vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'VAT treatment depends on the nature of the expense. Check your invoice — if 20% VAT is charged for a business purpose it is generally recoverable.' } },
+      { label: 'Minor — low in value relative to total remuneration', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor', vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'VAT treatment depends on the nature of the expense. Check your invoice — if 20% VAT is charged for a business purpose it is generally recoverable.' } },
+      { label: 'None of these apply', next: 'desc', set: { psaType: 'excluded', psaReason: 'Does not meet PSA criteria. Report via P11D or payroll.', vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'VAT treatment depends on the nature of the expense. Check your invoice — if 20% VAT is charged for a business purpose it is generally recoverable.' } }
     ]
   }
 };
@@ -377,7 +398,7 @@ function vatStatusColor(status) {
 function getVatInfo(o) {
   if (o.vatRate) return { rate: o.vatRate, status: o.vatStatus || 'Check invoice', note: o.vatNote || '' };
   // Fallbacks for paths that didn’t set vatRate
-  if (o.expType === 'meal' && o.vatNote) return { rate: '20%', status: 'Apportioned', note: o.vatNote };
+  if (o.vatMixed) return { rate: '20%', status: 'Apportioned', note: 'VAT is recoverable on the EH employee proportion only. Flag to Finance with a headcount split so the cost can be apportioned between 545 and 546.' };
   if (o.expType === 'gift') return { rate: '20%', status: 'Recoverable', note: '20% VAT on staff gifts is recoverable. Retain the VAT receipt.' };
   if (o.expType === 'merch') return { rate: '20%', status: 'Recoverable', note: '20% VAT on company merchandise is recoverable as a business purchase.' };
   return { rate: 'Varies', status: 'Check invoice', note: 'Check your invoice for VAT. If 20% is charged for a business purpose, it is generally recoverable.' };
@@ -466,31 +487,28 @@ function renderDesc() {
 
   qs('app').innerHTML = `
     <div class="card ${psa.cls}">
-      <div style="padding:.6rem 1.4rem .4rem;border-bottom:0.5px solid var(--color-border,#e8e6e0);">
-        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#999;">Xero entry details</span>
+      <div style="padding:.5rem 1.4rem .4rem;border-bottom:0.5px solid var(--color-border,#e8e6e0);">
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#007AFF;">Xero entry details</span>
       </div>
       <div class="outcome-strip">
-        <div class="outcome-cell">
+        <div class="outcome-cell" style="min-width:0;">
           <div class="outcome-lbl">Account code</div>
-          <div class="outcome-val">${o.code} – ${o.codeName}</div>
+          <div class="outcome-val" style="font-size:12px;line-height:1.35;word-break:break-word;">${o.code}</div>
+          <div style="font-size:11px;font-weight:400;color:inherit;opacity:.75;line-height:1.3;margin-top:2px;">${o.codeName}</div>
         </div>
-        <div class="outcome-cell">
+        <div class="outcome-cell" style="min-width:0;">
           <div class="outcome-lbl">VAT</div>
-          <div class="outcome-val" style="font-size:14px;">${vat.rate}</div>
-          <div style="font-size:12px;font-weight:500;color:${vatStatusColor(vat.status)};margin-top:3px;">${vat.status}</div>
+          <div class="outcome-val" style="font-size:12px;line-height:1.35;">${vat.rate}</div>
+          <div style="font-size:11px;font-weight:500;color:${vatStatusColor(vat.status)};margin-top:2px;">${vat.status}</div>
         </div>
-        <div class="outcome-cell">
+        <div class="outcome-cell" style="min-width:0;">
           <div class="outcome-lbl">PSA</div>
-          <div class="outcome-val"><span class="badge">${psa.badge}</span></div>
-          ${psaDetail}
+          <div class="outcome-val" style="font-size:12px;line-height:1.35;"><span class="badge">${psa.badge}</span></div>
         </div>
       </div>
-      ${vat.note ? `<div class="info-row">${vat.note}</div>` : ''}
-      ${o.psaReason && o.psaType !== 'excluded' ? `<div class="info-row">${o.psaReason}</div>` : ''}
-      ${o.psaType === 'excluded' && o.psaReason ? `<div class="info-row">${o.psaReason}</div>` : ''}
-${o.vatNote ? `<div class="info-row" style="background:#fdf6e3;border-top:1px solid #f0d98a;color:#7a5c00;"><strong style="color:#5a4200;">VAT note — flag to Finance:</strong> This event included employees and non-employees. EH can recover the employee proportion of input VAT. Submit to Finance with a headcount split (e.g. 8 EH employees, 4 contractors) so the cost can be apportioned between 545 and 546 accordingly.</div>` : ''}
       <div class="desc-section">
         <div class="desc-title">Build your description</div>
+        <div style="font-size:13px;color:#5a3e00;background:rgba(249,190,0,.12);border:1px solid #F9BE00;border-radius:7px;padding:.65rem .9rem;margin-bottom:1rem;line-height:1.5;"><strong style="color:#3d2a00;">VAT receipts required.</strong> Upload a VAT receipt or invoice to Xero with every expense. Without one, VAT cannot be reclaimed and the expense may be declined — this applies whether paid personally or on a company card.</div>
         ${fieldsHtml}
         <div class="preview-block">
           <div class="preview-lbl">Description preview</div>
@@ -501,6 +519,10 @@ ${o.vatNote ? `<div class="info-row" style="background:#fdf6e3;border-top:1px so
           </div>
         </div>
       </div>
+      ${(vat.note || o.psaReason || o.vatMixed) ? `<div style="padding:.5rem 1.4rem .2rem;border-top:0.5px solid var(--color-border,#e8e6e0);"><span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#999;">Finance reference</span></div>` : ''}
+      ${vat.note ? `<div class="info-row" style="border-top:none;padding-top:.5rem;">${vat.note}</div>` : ''}
+      ${o.psaReason ? `<div class="info-row" style="border-top:none;padding-top:.4rem;">${o.psaReason}</div>` : ''}
+      ${o.vatMixed ? `<div class="info-row" style="border-top:none;padding-top:.4rem;background:rgba(249,190,0,.1);border-top:1px solid #F9BE00;color:#5a3e00;"><strong style="color:#3d2a00;">VAT note — flag to Finance:</strong> This event included employees and non-employees. EH can recover the employee proportion of input VAT. Submit to Finance with a headcount split (e.g. 8 EH employees, 4 contractors) so the cost can be apportioned between 545 and 546 accordingly.</div>` : ''}
       <div class="card-foot">
         <button class="btn-back" onclick="goBack()">← Back</button>
         <button class="btn-restart" onclick="restart()">New expense</button>
