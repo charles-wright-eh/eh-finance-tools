@@ -281,6 +281,16 @@ const TEMPLATES = {
     ],
     build: f => `${f.service||'?'} – ${f.purpose||'?'}`
   },
+  training: {
+    fields: [
+      { id:'course', label:'Course or training name', ph:'e.g. Financial Modelling in Excel', half:false },
+      { id:'provider', label:'Provider', ph:'e.g. Coursera, ICAEW', half:true },
+      { id:'names', label:'Your name', ph:'e.g. CW', half:true },
+      { id:'from', label:'Training start date', ph:'e.g. 1 Mar 25', half:true },
+      { id:'to', label:'Training end date', ph:'e.g. 30 Apr 25', half:true }
+    ],
+    build: f => `${f.course||'?'} – ${f.provider||'?'} – ${f.names||'?'} (EH) – ${f.from||'?'} to ${f.to||'?'}`
+  },
   general: {
     fields: [
       { id:'what', label:'Description', ph:'What was the expense?', half:false },
@@ -305,6 +315,7 @@ function getTemplate(o) {
   if (o.expType === 'gift') return 'gift';
   if (o.expType === 'merch') return 'merch';
   if (o.expType === 'software') return 'software';
+  if (o.expType === 'training') return 'training';
   return 'general';
 }
 
