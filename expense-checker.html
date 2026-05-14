@@ -34,7 +34,7 @@ h1{font-size:22px;font-weight:600;color:#111;margin-bottom:.4rem;letter-spacing:
 .btn-restart:hover{color:#666}
 
 /* Result badges */
-.outcome-strip{padding:1.1rem 1.4rem;border-bottom:1px solid;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.outcome-strip{padding:1.1rem 1.4rem;border-bottom:1px solid;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .outcome-cell{}
 .outcome-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
 .outcome-val{font-size:15px;font-weight:600;line-height:1.3}
@@ -123,13 +123,13 @@ const QS = {
     q: 'What type of expense is this?',
     hint: 'Select the category that best fits.',
     opts: [
-      { label: 'Company merchandise or branded items', next: 'desc', set: { expType: 'merch', code: 565, codeName: 'General Expenses', psaType: 'included', psaCriterion: 'irregular' } },
+      { label: 'Company merchandise or branded items', next: 'desc', set: { expType: 'merch', code: 565, codeName: 'General Expenses', psaType: 'included', psaCriterion: 'irregular', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on company merchandise is recoverable as a business purchase. Retain the VAT invoice.' } },
       { label: 'Gift or personal item for an employee', next: 'q_gift_who', set: { expType: 'gift' } },
       { label: 'IT equipment or hardware', next: 'q_it_type', set: { expType: 'it' } },
-      { label: 'Marketing or advertising', next: 'desc', set: { expType: 'marketing', code: 540, codeName: 'Advertising & Marketing', psaType: 'none' } },
+      { label: 'Marketing or advertising', next: 'desc', set: { expType: 'marketing', code: 540, codeName: 'Advertising & Marketing', psaType: 'none', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on marketing and advertising is fully recoverable. Ensure you have a VAT invoice.' } },
       { label: 'Meal or entertaining', next: 'q_meal_who', set: { expType: 'meal' } },
-      { label: 'Software, tool, or subscription', next: 'desc', set: { expType: 'software', code: 550, codeName: 'Subscriptions', psaType: 'none' } },
-      { label: 'Staff training or development', next: 'desc', set: { expType: 'training', code: 536, codeName: 'Staff Training', psaType: 'none' } },
+      { label: 'Software, tool, or subscription', next: 'q_software_origin', set: { expType: 'software', code: 550, codeName: 'Subscriptions', psaType: 'none' } },
+      { label: 'Staff training or development', next: 'desc', set: { expType: 'training', code: 536, codeName: 'Staff Training', psaType: 'none', vatRate: 'Often exempt', vatStatus: 'Check invoice', vatNote: 'Training from professional or educational bodies is often VAT exempt. If 20% VAT is charged, it is recoverable. Check the invoice.' } },
       { label: 'Travel — train, taxi, flight, Uber, fuel', next: 'q_travel_loc', set: { expType: 'travel' } },
       { label: 'Something else', next: 'q_other_benefit', set: { expType: 'other' } }
     ]
@@ -138,15 +138,28 @@ const QS = {
     q: 'Where is the travel to?',
     hint: 'UK = anywhere within Great Britain and Northern Ireland.',
     opts: [
-      { label: 'Within the UK', next: 'desc', set: { code: 572, codeName: 'Travel – National', psaType: 'none' } },
-      { label: 'International', next: 'desc', set: { code: 573, codeName: 'Travel – International', psaType: 'none' } }
+      { label: 'Within the UK', next: 'q_transport_type', set: { code: 572, codeName: 'Travel – National', psaType: 'none' } },
+      { label: 'International', next: 'desc', set: { code: 573, codeName: 'Travel – International', psaType: 'none', vatRate: 'Foreign VAT', vatStatus: 'Not reclaimable', vatNote: 'Foreign VAT cannot be reclaimed on the UK VAT return. Contact Finance if the amount is significant.' } }
+    ]
+  },
+  q_transport_type: {
+    q: 'What is the mode of transport or expense?',
+    hint: 'VAT treatment varies significantly by type.',
+    opts: [
+      { label: 'Car hire', next: 'desc', set: { vatRate: '20%', vatStatus: '50% recoverable', vatNote: 'Car hire VAT is 50% blocked where the vehicle is available for private use — HMRC VAT Notice 700/64.' } },
+      { label: 'Flight', next: 'desc', set: { vatRate: 'Zero rated', vatStatus: 'No VAT', vatNote: 'Passenger flights are zero rated. No VAT to reclaim.' } },
+      { label: 'Fuel', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable on business fuel with a VAT receipt. A fuel scale charge may apply for company vehicles.' } },
+      { label: 'Hotel or accommodation', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable. Ensure the VAT invoice is addressed to Element Human.' } },
+      { label: 'Taxi or rideshare (Uber, Bolt etc.)', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable. Uber is VAT registered in the UK — download the VAT invoice from the app.' } },
+      { label: 'Train, tube, or bus', next: 'desc', set: { vatRate: 'Zero rated', vatStatus: 'No VAT', vatNote: 'Trains, tubes, and buses are zero rated. No VAT to reclaim.' } },
+      { label: 'Other', next: 'desc', set: { vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'Check your receipt for VAT. If 20% is charged for a business purpose it is generally recoverable.' } }
     ]
   },
   q_meal_who: {
     q: 'Who attended?',
     hint: 'This determines the account code and whether the expense is client entertaining.',
     opts: [
-      { label: 'Clients or external business contacts', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client entertaining — not an employee benefit. Disallowable for corporation tax.' } },
+      { label: 'Clients or external business contacts', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client entertaining — not an employee benefit. Disallowable for corporation tax.', vatRate: '20%', vatStatus: 'Blocked', vatNote: 'Input VAT on client entertaining cannot be reclaimed — HMRC VAT Notice 700/65.' } },
       { label: 'EH employees and contractors or non-employees', next: 'q_meal_occasion', set: { code: 546, codeName: 'Entertainment – 0%', vatNote: true } },
       { label: 'EH employees only', next: 'q_meal_occasion', set: { code: 545, codeName: 'Entertainment – 100% business' } }
     ]
@@ -156,33 +169,33 @@ const QS = {
     hint: null,
     opts: [
       { label: 'Annual company event (Christmas party, summer event)', next: 'q_party_limit', set: {} },
-      { label: 'Celebration or milestone (work anniversary, leaving, achievement)', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular' } },
-      { label: 'Offsite or away day', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
+      { label: 'Celebration or milestone (work anniversary, leaving, achievement)', next: 'desc', set: { psaType: 'included', psaCriterion: 'irregular', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on staff celebration meals is fully recoverable. Retain the VAT receipt.' } },
+      { label: 'Offsite or away day', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on staff-only offsites is fully recoverable. Retain VAT receipts.' } },
       { label: 'Social team lunch or dinner (not a meeting)', next: 'q_team_size', set: {} },
-      { label: 'Working lunch or dinner during a formal meeting', next: 'desc', set: { psaType: 'exempt', psaReason: 'Business subsistence during a qualifying meeting — not a taxable benefit. Retain records of attendees and purpose.' } }
+      { label: 'Working lunch or dinner during a formal meeting', next: 'desc', set: { psaType: 'exempt', psaReason: 'Business subsistence during a qualifying meeting — not a taxable benefit. Retain records of attendees and purpose.', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on business subsistence during qualifying meetings is fully recoverable. Retain the VAT receipt.' } }
     ]
   },
   q_party_limit: {
     q: 'Is the combined per-head cost for all company functions this tax year £150 or under?',
     hint: 'Add up all annual events — Christmas party, summer party, etc. If the total per head exceeds £150, the exemption is lost and the full amount becomes taxable.',
     opts: [
-      { label: 'Yes — £150 per head or under in total', next: 'desc', set: { psaType: 'exempt', psaReason: 'Annual party exemption (≤£150/head across all functions this tax year).' } },
-      { label: 'No — combined cost exceeds £150 per head', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } }
+      { label: 'Yes — £150 per head or under in total', next: 'desc', set: { psaType: 'exempt', psaReason: 'Annual party exemption (≤£150/head across all functions this tax year).', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on qualifying annual staff functions is fully recoverable. Retain VAT receipts.' } },
+      { label: 'No — combined cost exceeds £150 per head', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on staff-only functions is fully recoverable regardless of the PSA position. Retain VAT receipts.' } }
     ]
   },
   q_team_size: {
     q: 'How many people attended?',
     hint: null,
     opts: [
-      { label: '3 or more', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable' } },
-      { label: '2 or fewer', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor' } }
+      { label: '3 or more', next: 'desc', set: { psaType: 'included', psaCriterion: 'impracticable', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on staff social meals is fully recoverable. Retain the VAT receipt.' } },
+      { label: '2 or fewer', next: 'desc', set: { psaType: 'included', psaCriterion: 'minor', vatRate: '20%', vatStatus: 'Recoverable', vatNote: 'VAT on staff social meals is fully recoverable. Retain the VAT receipt.' } }
     ]
   },
   q_gift_who: {
     q: 'Who is the gift for?',
     hint: null,
     opts: [
-      { label: 'A client or external contact', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client gift — not an employee benefit.' } },
+      { label: 'A client or external contact', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client gift — not an employee benefit.', vatRate: '20%', vatStatus: 'Blocked', vatNote: 'Input VAT on gifts to clients is blocked where no output tax has been charged to the recipient.' } },
       { label: 'New joiner welcome', next: 'q_gift_val', set: { code: 565, codeName: 'General Expenses', giftType: 'welcome' } },
       { label: 'Personal milestone — wedding, baby, marathon', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'milestone' } },
       { label: 'Team recognition, prize, or achievement award', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'recognition' } }
@@ -192,16 +205,24 @@ const QS = {
     q: 'What is the value of the gift?',
     hint: 'The trivial benefit exemption covers non-cash gifts of £50 or under, provided they are not performance-related.',
     opts: [
-      { label: '£50 or under', next: 'desc', set: { psaType: 'exempt', psaReason: 'Trivial benefit exemption — non-cash gift at or under £50. No reporting required.' } },
-      { label: 'Over £50', next: 'desc', set: { psaType: 'included' } }
+      { label: '£50 or under', next: 'desc', set: { psaType: 'exempt', psaReason: 'Trivial benefit exemption — non-cash gift at or under £50. No reporting required.', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on staff gifts is recoverable as a business purchase. Retain the VAT receipt.' } },
+      { label: 'Over £50', next: 'desc', set: { psaType: 'included', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on staff gifts is recoverable as a business purchase. Retain the VAT receipt.' } }
+    ]
+  },
+  q_software_origin: {
+    q: 'Is this from a UK or overseas supplier?',
+    hint: 'UK suppliers charge 20% VAT. Overseas suppliers use the reverse charge mechanism.',
+    opts: [
+      { label: 'Overseas supplier (US, EU etc.)', next: 'desc', set: { vatRate: 'Reverse charge', vatStatus: 'Nil net cost', vatNote: 'Overseas digital services use the reverse charge — EH declares and simultaneously reclaims the VAT. No net cost, no VAT invoice needed.' } },
+      { label: 'UK supplier', next: 'desc', set: { vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable. Ensure you have a VAT invoice from the supplier.' } }
     ]
   },
   q_it_type: {
     q: 'What type of IT cost?',
     hint: null,
     opts: [
-      { label: 'Hardware, peripherals, or accessories', next: 'desc', set: { code: 567, codeName: 'IT Consumables', psaType: 'none' } },
-      { label: 'Phone or internet', next: 'desc', set: { code: 571, codeName: 'Telephone & Internet', psaType: 'none' } }
+      { label: 'Hardware, peripherals, or accessories', next: 'desc', set: { code: 567, codeName: 'IT Consumables', psaType: 'none', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on business IT equipment is fully recoverable. Retain the VAT invoice.' } },
+      { label: 'Phone or internet', next: 'desc', set: { code: 571, codeName: 'Telephone & Internet', psaType: 'none', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT is recoverable on business phone and internet. If there is personal use, only the business proportion can be reclaimed.' } }
     ]
   },
   q_other_benefit: {
@@ -209,7 +230,7 @@ const QS = {
     hint: 'e.g. a voucher, personal item, or subscription provided for personal use.',
     opts: [
       { label: 'Yes — it benefits a specific employee or group', next: 'q_other_criteria', set: { code: 565, codeName: 'General Expenses' } },
-      { label: 'No — it is a general business cost', next: 'desc', set: { code: 565, codeName: 'General Expenses', psaType: 'none' } }
+      { label: 'No — it is a general business cost', next: 'desc', set: { code: 565, codeName: 'General Expenses', psaType: 'none', vatRate: 'Varies', vatStatus: 'Check invoice', vatNote: 'Check your invoice for VAT. If 20% is charged for a business purpose, it is generally recoverable.' } }
     ]
   },
   q_other_criteria: {
@@ -225,7 +246,7 @@ const QS = {
 };
 
 // Question order for progress bar
-const Q_ORDER = ['q_type','q_travel_loc','q_meal_who','q_meal_occasion','q_party_limit','q_team_size','q_gift_who','q_gift_val','q_it_type','q_other_benefit','q_other_criteria'];
+const Q_ORDER = ['q_type','q_travel_loc','q_transport_type','q_meal_who','q_meal_occasion','q_party_limit','q_team_size','q_gift_who','q_gift_val','q_software_origin','q_it_type','q_other_benefit','q_other_criteria'];
 const MAX_STEPS = 3;
 
 // ─── Description templates ────────────────────────────────────────────────────
@@ -343,6 +364,25 @@ function progressDots(currentQ) {
   ).join('');
 }
 
+// ─── VAT helpers ──────────────────────────────────────────────────────────────────
+function vatStatusColor(status) {
+  if (status === 'Recoverable') return '#0f6e56';
+  if (status === 'Blocked') return '#993C1D';
+  if (status === 'Apportioned') return '#BA7517';
+  if (status === 'Nil net cost') return '#185FA5';
+  if (status === '50% recoverable') return '#BA7517';
+  return '#888';
+}
+
+function getVatInfo(o) {
+  if (o.vatRate) return { rate: o.vatRate, status: o.vatStatus || 'Check invoice', note: o.vatNote || '' };
+  // Fallbacks for paths that didn’t set vatRate
+  if (o.expType === 'meal' && o.vatNote) return { rate: '20%', status: 'Apportioned', note: o.vatNote };
+  if (o.expType === 'gift') return { rate: '20%', status: 'Recoverable', note: '20% VAT on staff gifts is recoverable. Retain the VAT receipt.' };
+  if (o.expType === 'merch') return { rate: '20%', status: 'Recoverable', note: '20% VAT on company merchandise is recoverable as a business purchase.' };
+  return { rate: 'Varies', status: 'Check invoice', note: 'Check your invoice for VAT. If 20% is charged for a business purpose, it is generally recoverable.' };
+}
+
 // ─── Render question phase ────────────────────────────────────────────────────
 function renderQ() {
   const q = QS[state.current];
@@ -387,6 +427,7 @@ function renderDesc() {
   const psa = PSA_LABELS[o.psaType] || PSA_LABELS.none;
   const tplKey = getTemplate(o);
   const tpl = TEMPLATES[tplKey];
+  const vat = getVatInfo(o);
 
   // PSA sub-label
   let psaDetail = '';
@@ -425,10 +466,18 @@ function renderDesc() {
 
   qs('app').innerHTML = `
     <div class="card ${psa.cls}">
+      <div style="padding:.6rem 1.4rem .4rem;border-bottom:0.5px solid var(--color-border,#e8e6e0);">
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#999;">Xero entry details</span>
+      </div>
       <div class="outcome-strip">
         <div class="outcome-cell">
           <div class="outcome-lbl">Account code</div>
           <div class="outcome-val">${o.code} – ${o.codeName}</div>
+        </div>
+        <div class="outcome-cell">
+          <div class="outcome-lbl">VAT</div>
+          <div class="outcome-val" style="font-size:14px;">${vat.rate}</div>
+          <div style="font-size:12px;font-weight:500;color:${vatStatusColor(vat.status)};margin-top:3px;">${vat.status}</div>
         </div>
         <div class="outcome-cell">
           <div class="outcome-lbl">PSA</div>
@@ -436,6 +485,7 @@ function renderDesc() {
           ${psaDetail}
         </div>
       </div>
+      ${vat.note ? `<div class="info-row">${vat.note}</div>` : ''}
       ${o.psaReason && o.psaType !== 'excluded' ? `<div class="info-row">${o.psaReason}</div>` : ''}
       ${o.psaType === 'excluded' && o.psaReason ? `<div class="info-row">${o.psaReason}</div>` : ''}
 ${o.vatNote ? `<div class="info-row" style="background:#fdf6e3;border-top:1px solid #f0d98a;color:#7a5c00;"><strong style="color:#5a4200;">VAT note — flag to Finance:</strong> This event included employees and non-employees. EH can recover the employee proportion of input VAT. Submit to Finance with a headcount split (e.g. 8 EH employees, 4 contractors) so the cost can be apportioned between 545 and 546 accordingly.</div>` : ''}
