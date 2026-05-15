@@ -145,7 +145,7 @@ const QS = {
     hint: 'Select the category that best fits.',
     opts: [
       { label: 'Company merchandise or branded items', next: 'desc', set: { expType: 'merch', code: 565, codeName: 'General Expenses', psaType: 'included', psaCriterion: 'irregular', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on company merchandise is recoverable as a business purchase. Retain the VAT invoice.' } },
-      { label: 'Gift or personal item for an employee', next: 'q_gift_who', set: { expType: 'gift' } },
+      { label: 'Gift or personal item', next: 'q_gift_who', set: { expType: 'gift' } },
       { label: 'IT equipment or hardware', next: 'q_it_type', set: { expType: 'it' } },
       { label: 'Marketing or advertising', next: 'desc', set: { expType: 'marketing', code: 540, codeName: 'Advertising & Marketing', psaType: 'none', vatRate: '20%', vatStatus: 'Recoverable', vatNote: '20% VAT on marketing and advertising is fully recoverable. Ensure you have a VAT invoice.' } },
       { label: 'Meal or entertaining', next: 'q_meal_who', set: { expType: 'meal' } },
@@ -216,7 +216,14 @@ const QS = {
     q: 'Who is the gift for?',
     hint: null,
     opts: [
-      { label: 'A client or external contact', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Client gift — not an employee benefit.', vatRate: '20%', vatStatus: 'Blocked', vatNote: 'Input VAT on gifts to clients is blocked where no output tax has been charged to the recipient.' } },
+      { label: 'An EH employee', next: 'q_gift_occasion', set: {} },
+      { label: 'A client, supplier, or external contact', next: 'desc', set: { code: 546, codeName: 'Entertainment – 0%', psaType: 'excluded', psaReason: 'Gift to a non-employee — not an employee benefit. No PSA or P11D obligation for EH. Disallowable for corporation tax unless it carries a conspicuous EH advertisement and is under £50/recipient/year.', vatRate: '20%', vatStatus: 'Blocked', vatNote: 'Input VAT on gifts to non-employees is blocked where no output tax has been charged to the recipient — VAT Notice 700/65.' } }
+    ]
+  },
+  q_gift_occasion: {
+    q: 'What is the occasion?',
+    hint: null,
+    opts: [
       { label: 'New joiner welcome', next: 'q_gift_val', set: { code: 565, codeName: 'General Expenses', giftType: 'welcome' } },
       { label: 'Personal milestone — wedding, baby, marathon', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'milestone' } },
       { label: 'Team recognition, prize, or achievement award', next: 'q_gift_val', set: { code: 535, codeName: 'Staff Welfare', giftType: 'recognition' } }
@@ -267,7 +274,7 @@ const QS = {
 };
 
 // Question order for progress bar
-const Q_ORDER = ['q_type','q_travel_loc','q_transport_type','q_meal_who','q_meal_occasion','q_party_limit','q_team_size','q_gift_who','q_gift_val','q_software_origin','q_it_type','q_other_benefit','q_other_criteria'];
+const Q_ORDER = ['q_type','q_travel_loc','q_transport_type','q_meal_who','q_meal_occasion','q_party_limit','q_team_size','q_gift_who','q_gift_occasion','q_gift_val','q_software_origin','q_it_type','q_other_benefit','q_other_criteria'];
 const MAX_STEPS = 3;
 
 // ─── Description templates ────────────────────────────────────────────────────
@@ -418,16 +425,15 @@ function renderQ() {
       <div class="card-body">
         <div class="q-text">${q.q}</div>
         ${q.hint ? `<div class="q-hint">${q.hint}</div>` : '<div style="height:.75rem"></div>'}
-        ${state.current === 'q_type' ? `<div style="margin-bottom:1.25rem;">
-          <label class="field-label" style="margin-bottom:4px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:#333;">Gross value (£) <span style="font-size:11px;font-weight:600;color:#c0392b;background:#fdecea;padding:1px 6px;border-radius:4px;letter-spacing:.04em;">Required</span></label>
-          <input class="field-input" id="gross-value-input" type="number" min="0" placeholder="e.g. 250" style="max-width:180px;" value="${state.outcome.grossValue||''}" oninput="clearGrossError()">
-          <div id="gross-error" style="display:none;font-size:12px;color:#c0392b;margin-top:4px;">Enter the gross value before selecting a category.</div>
-        </div>` : ''}
         <div class="options">
           ${q.opts.map((o,i) =>
             `<button class="opt" onclick="choose(${i})">${o.label}</button>`
           ).join('')}
         </div>
+        ${state.current === 'q_type' ? `<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0ede8;">
+          <label class="field-label" style="margin-bottom:6px;display:block;">Gross value (£) <span style="color:#bbb;font-weight:400;">— optional</span></label>
+          <input class="field-input" id="gross-value-input" type="number" min="0" placeholder="e.g. 250" style="max-width:180px;" value="${state.outcome.grossValue||''}">
+        </div>` : ''}
       </div>
       <div class="card-foot">
         ${hasBack ? `<button class="btn-back" onclick="goBack()">← Back</button>` : '<span></span>'}
@@ -610,25 +616,11 @@ function copyDesc() {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-function clearGrossError() {
-  const err = document.getElementById('gross-error');
-  const inp = document.getElementById('gross-value-input');
-  if (err) err.style.display = 'none';
-  if (inp) inp.style.borderColor = '';
-}
-
 function choose(i) {
-  // Gross value is mandatory on the first question
+  // Capture gross value from page 1 before navigating away
   if (state.current === 'q_type') {
     const gvEl = document.getElementById('gross-value-input');
-    const val = gvEl ? gvEl.value.trim() : '';
-    if (!val || parseFloat(val) <= 0) {
-      const err = document.getElementById('gross-error');
-      if (err) err.style.display = 'block';
-      if (gvEl) { gvEl.style.borderColor = '#c0392b'; gvEl.focus(); }
-      return;
-    }
-    state.outcome.grossValue = parseFloat(val);
+    if (gvEl && gvEl.value) state.outcome.grossValue = parseFloat(gvEl.value);
   }
   const q = QS[state.current];
   const opt = q.opts[i];
